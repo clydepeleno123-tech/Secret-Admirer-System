@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Love Notes 💌</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <div class="search-container">
+                <label for="search">Search:</label>
+                <input type="text" id="search" placeholder="Search users...">
+            </div>
+
+            <!-- MAIN DASHBOARD -->
+            <div id="main-dashboard" class="dashboard">
+                <div class="heart-background"></div>
+                <div class="listbox-container">
+                    <select id="users-listbox" multiple>
+                        <option>Loading...</option>
+                    </select>
+                </div>
+                <div class="bottom-buttons" id="bottom-buttons"></div>
+            </div>
+
+            <!-- NOTES DASHBOARD -->
+            <div id="notes-dashboard" class="dashboard hidden">
+                <div id="send-to-label" class="send-label"></div>
+                <textarea id="note-textarea" placeholder="Write your anonymous love note here..." maxlength="300"></textarea>
+                <div class="button-group">
+                    <button id="done-btn" class="primary-btn">Done 💌</button>
+                    <button id="back-btn" class="primary-btn">Back</button>
+                </div>
+            </div>
+
+            <!-- VIEW NOTE -->
+            <div id="view-note" class="dashboard hidden">
+                <div class="note-header">💌 Anonymous Message 💌</div>
+                <textarea id="view-textarea" readonly></textarea>
+                <div class="button-group">
+                    <button id="back-from-view" class="primary-btn">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+            <div class="right-top">
+                <div class="header">Love 💖</div>
+
+                <!-- LOGIN FORM -->
+                <div id="login-form" class="form hidden">
+                    <label>Username</label>
+                    <input type="text" id="login-user" placeholder="Enter username">
+                    <label>Password</label>
+                    <input type="password" id="login-pwd" placeholder="Enter password">
+                    <button id="login-btn" class="form-btn">Login</button>
+                    <button id="login-back" class="form-btn secondary">Back</button>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="register-form" class="form hidden">
+                    <label>Username</label>
+                    <input type="text" id="reg-user" placeholder="Enter username">
+                    <label>Password</label>
+                    <input type="password" id="reg-pwd" placeholder="Enter password">
+                    <label>Confirm Password</label>
+                    <input type="password" id="reg-pwd2" placeholder="Confirm password">
+                    <button id="register-btn" class="form-btn">Register</button>
+                    <button id="reg-back" class="form-btn secondary">Back</button>
+                </div>
+
+                <!-- DELETE ACCOUNT FORM -->
+                <div id="delete-form" class="form hidden">
+                    <div class="delete-label">Select account(s) to delete 💔</div>
+                    <select id="delete-listbox" multiple></select>
+                    <label>Admin Password:</label>
+                    <input type="password" id="admin-pwd" placeholder="Enter admin password">
+                    <button id="confirm-delete-btn" class="form-btn danger">Confirm Delete</button>
+                </div>
+
+                <!-- MAIN BUTTONS -->
+                <div id="main-buttons">
+                    <button id="login-toggle" class="action-btn">Login 🔑</button>
+                    <button id="register-toggle" class="action-btn">Register ✍️</button>
+                    <button id="delete-toggle" class="action-btn">Delete Account ❌</button>
+                </div>
+            </div>
+
+            <div class="right-bottom">
+                <button id="exit-btn" class="action-btn danger">Exit ❌</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
