@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Love Notes 💌</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #FFE4F0;
+        }
+
+        :root {
+            --bg: #FFE4F0;
+            --entry-bg: #FFF0F5;
+            --btn-bg: #FF6B81;
+            --btn-hover: #FF8DAA;
+            --btn-active: #FF5B71;
+            --text-primary: #900C3F;
+            --text-secondary: #999;
+            --border-color: #FFB6C1;
+            --right-bg: #FFDDE6;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg);
+        }
+
+        .left {
+            flex: 1;
+            background-color: var(--bg);
+            overflow-y: auto;
+            position: relative;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right {
+            width: 220px;
+            background-color: var(--right-bg);
+            display: flex;
+            flex-direction: column;
+            border-left: 3px solid var(--btn-bg);
+            overflow: hidden;
+        }
+
+        .right-top {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .right-bottom {
+            padding: 12px;
+            border-top: 2px solid var(--btn-bg);
+            background-color: #FFD1DC;
+        }
+
+        /* ========== BUTTONS ========== */
+        button {
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: var(--transition);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            background-color: var(--btn-active);
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+
+        /* ========== FORMS ========== */
+        label {
+            color: var(--text-primary);
+            font-weight: 600;
+            display: block;
+            margin: 12px 0 6px 0;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        input, textarea {
+            background-color: var(--entry-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            padding: 10px 11px;
+            margin: 6px 0;
+            width: 100%;
+            font-family: inherit;
+            border-radius: 5px;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #bbb;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--btn-bg);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+        }
+
+        /* ========== TYPOGRAPHY ========== */
+        h1, h2, h3 {
+            color: var(--text-primary);
+            margin: 12px 0 8px 0;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 22px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 14px;
+            margin-top: 12px;
+        }
+
+        /* ========== DASHBOARDS ========== */
+        .dashboard {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== LISTS ========== */
+        .user-list, .notes-list, .delete-list {
+            background-color: white;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            overflow: hidden;
+            margin: 12px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .user-list, .notes-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .delete-list {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .user-item, .note-item, .delete-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--entry-bg);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .user-item:last-child, .note-item:last-child, .delete-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-item:hover, .note-item:hover {
+            background-color: #FFF0F5;
+        }
+
+        .user-item.selected, .note-item.selected {
+            background-color: #FFD1DC;
+            font-weight: 600;
+        }
+
+        .user-name {
+            flex: 1;
+        }
+
+        .msg-count {
+            background-color: var(--btn-bg);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .note-item > div {
+            flex: 1;
+        }
+
+        .note-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: var(--btn-bg);
+        }
+
+        .note-timestamp {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        .delete-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: var(--btn-bg);
+        }
+
+        .delete-item label {
+            margin: 0;
+            flex: 1;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* ========== FRAMES & BOXES ========== */
+        .frame {
+            background-color: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.4s ease, margin 0.4s ease;
+        }
+
+        .frame.open {
+            max-height: 500px;
+            opacity: 1;
+            margin: 12px 0;
+        }
+
+        .note-view-box {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            min-height: 200px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-primary);
+            line-height: 1.8;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            max-height: 400px;
+            font-size: 13px;
+        }
+
+        .search-box {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-box input {
+            margin: 0;
+        }
+
+        /* ========== BUTTON GROUPS ========== */
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .btn-group button {
+            flex: 1;
+            margin: 0;
+            padding: 8px 10px;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .title-section h2 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        /* ========== MODALS ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeInOverlay 0.2s ease-in;
+        }
+
+        @keyframes fadeInOverlay {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 350px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: slideInModal 0.3s ease-out;
+        }
+
+        @keyframes slideInModal {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal h2 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            margin: 0;
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            background-color: white;
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--entry-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--btn-bg);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--btn-hover);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .right {
+                width: 100%;
+                border-left: none;
+                border-top: 3px solid var(--btn-bg);
+            }
+
+            button {
+                padding: 8px 10px;
+                font-size: 10px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            h3 {
+                font-size: 13px;
+            }
+        }
+
+        /* ========== UTILITIES ========== */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .fade-out {
+            animation: fadeOut 0.3s ease-out;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .user-status-badge {
+            display: inline-block;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LEFT PANEL -->
+        <div class="left" id="leftPanel">
+            <!-- GUEST DASHBOARD -->
+            <div id="guestDash" class="dashboard active">
+                <div class="title-section">
+                    <h2>💌 Send Love Note</h2>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search users..." aria-label="Search users">
+                </div>
+                <h3>Available Users</h3>
+                <div class="user-list" id="userList" role="listbox">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>No users yet. Register to get started!</div>
+                    </div>
+                </div>
+                <div id="guestButtons" class="btn-group" style="margin-top: auto;">
+                    <button id="addNoteBtn" onclick="app.goToNotes()" disabled aria-label="Add a new love note">
+                        Add Note 💌
+                    </button>
+                </div>
+            </div>
+
+            <!-- NOTE SENDING DASHBOARD -->
+            <div id="sendNoteDash" class="dashboard">
+                <div class="title-section">
+                    <h2 id="sendToTitle">Send to:</h2>
+                </div>
+                <textarea id="noteText" placeholder="Write your love note here... (max 300 characters)" maxlength="300" aria-label="Love note content"></textarea>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                    <span id="charCount">0</span>/300 characters
+                </div>
+                <div class="btn-group">
+                    <button onclick="app.sendNote()" aria-label="Send your love note">Send 💌</button>
+                    <button onclick="app.backToDashboard()" aria-label="Go back">Back</button>
+                </div>
+            </div>
+
+            <!-- LOGGED IN DASHBOARD -->
+            <div id="userDash" class="dashboard">
+                <div class="title-section">
+                    <h2 id="welcomeMsg">My Love Notes ❤️</h2>
+                </div>
+                <h3>Received Messages</h3>
+                <div class="notes-list" id="notesList" role="listbox">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💌</div>
+                        <div>No messages yet. Be patient, love will come! 💖</div>
+                    </div>
+                </div>
+                <div class="btn-group" style="margin-top: auto;">
+                    <button onclick="app.deleteAllNotes()" aria-label="Delete all notes">Delete All</button>
+                    <button onclick="app.deleteSelectedNotes()" aria-label="Delete selected notes">Delete Selected</button>
+                </div>
+            </div>
+
+            <!-- VIEW NOTE PAGE -->
+            <div id="viewNoteDash" class="dashboard">
+                <div class="title-section">
+                    <h2>💌 Anonymous Message 💌</h2>
+                </div>
+                <div class="note-view-box" id="noteContent" role="article"></div>
+                <div class="btn-group">
+                    <button onclick="app.backToDashboard()" aria-label="Go back">Back</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right">
+            <div class="right-top" id="rightTop">
+                <h3 style="text-align: center; margin-top: 0; font-size: 13px;">Love 💖</h3>
+                <button onclick="app.toggleLoginFrame()" aria-label="Toggle login form">Login 🔑</button>
+                <button onclick="app.toggleRegisterFrame()" aria-label="Toggle register form">Register ✍️</button>
+                <button onclick="app.toggleDeleteFrame()" aria-label="Toggle delete account form">Delete Account ❌</button>
+
+                <!-- LOGIN FRAME -->
+                <div id="loginFrame" class="frame">
+                    <h3 style="text-align: center; margin-top: 0; font-size: 13px;">Login</h3>
+                    <form onsubmit="event.preventDefault(); app.doLogin();">
+                        <label for="loginUsername">Username</label>
+                        <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+                        <div class="btn-group">
+                            <button type="submit" aria-label="Submit login">Login</button>
+                            <button type="button" onclick="app.toggleLoginFrame()" aria-label="Close login form">Close</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- REGISTER FRAME -->
+                <div id="registerFrame" class="frame">
+                    <h3 style="text-align: center; margin-top: 0; font-size: 13px;">Register</h3>
+                    <form onsubmit="event.preventDefault(); app.doRegister();">
+                        <label for="registerUsername">Username</label>
+                        <input type="text" id="registerUsername" placeholder="Choose username" autocomplete="username">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" placeholder="Enter password" autocomplete="new-password">
+                        <label for="registerPassword2">Confirm Password</label>
+                        <input type="password" id="registerPassword2" placeholder="Confirm password" autocomplete="new-password">
+                        <div class="btn-group">
+                            <button type="submit" aria-label="Submit registration">Register</button>
+                            <button type="button" onclick="app.toggleRegisterFrame()" aria-label="Close register form">Close</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- DELETE ACCOUNT FRAME -->
+                <div id="deleteFrame" class="frame">
+                    <h3 style="text-align: center; margin-top: 0; font-size: 13px;">Delete Account</h3>
+                    <label for="deleteListbox">Select account(s):</label>
+                    <div class="delete-list" id="deleteListbox" role="listbox"></div>
+                    <label for="adminPassword">Admin Password:</label>
+                    <input type="password" id="adminPassword" placeholder="Enter admin password" autocomplete="off">
+                    <div class="btn-group">
+                        <button onclick="app.deleteSelectedAccounts()" aria-label="Confirm deletion">Delete</button>
+                        <button onclick="app.toggleDeleteFrame()" aria-label="Close delete form">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-bottom">
+                <div id="userStatusDiv" style="text-align: center; margin-bottom: 8px; display: none;">
+                    <span id="currentUserSpan" class="user-status-badge"></span>
+                </div>
+                <button onclick="app.logout()" id="logoutBtn" style="display: none;" aria-label="Logout">Logout 👋</button>
+                <button onclick="app.exitApp()" aria-label="Exit application">Exit ❌</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGE MODAL -->
+    <div id="messageModal" class="modal-overlay" role="alertdialog" aria-modal="true">
+        <div class="modal">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button onclick="app.closeModal()" aria-label="Close message">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Enhanced Notes App - Compact Version
+         */
+        class NotesApp {
+            constructor() {
+                this.users = [];
+                this.receivedNotes = {};
+                this.timestamps = {};
+                this.currentUser = "guest";
+                this.selectedRecipient = null;
+                this.selectedNotes = new Set();
+                this.selectedDeleteAccounts = new Set();
+                this.currentViewNoteIdx = 0;
+                this.refreshInterval = null;
+
+                this.init();
+            }
+
+            init() {
+                this.loadUsers();
+                this.loadNotes();
+                this.setupEventListeners();
+                this.showGuestDashboard();
+                this.startAutoRefresh();
+            }
+
+            setupEventListeners() {
+                const searchInput = document.getElementById("searchInput");
+                if (searchInput) {
+                    searchInput.addEventListener("input", (e) => {
+                        requestAnimationFrame(() => this.refreshUserList());
+                    });
+                }
+
+                const noteText = document.getElementById("noteText");
+                if (noteText) {
+                    noteText.addEventListener("input", () => this.updateCharCount());
+                }
+
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" && e.ctrlKey) {
+                        this.handleCtrlEnter();
+                    } else if (e.key === "Enter" && !e.shiftKey) {
+                        this.handleEnter(e);
+                    }
+                });
+            }
+
+            handleEnter(e) {
+                const loginFrame = document.getElementById("loginFrame");
+                const registerFrame = document.getElementById("registerFrame");
+                const noteText = document.getElementById("noteText");
+
+                if (loginFrame && loginFrame.classList.contains("open")) {
+                    e.preventDefault();
+                    this.doLogin();
+                } else if (registerFrame && registerFrame.classList.contains("open")) {
+                    e.preventDefault();
+                    this.doRegister();
+                }
+            }
+
+            handleCtrlEnter() {
+                const noteText = document.getElementById("noteText");
+                if (noteText && noteText.offsetParent && noteText.value.trim()) {
+                    this.sendNote();
+                }
+            }
+
+            updateCharCount() {
+                const noteText = document.getElementById("noteText");
+                const charCount = document.getElementById("charCount");
+                if (noteText && charCount) {
+                    charCount.textContent = noteText.value.length;
+                }
+            }
+
+            // ========== STORAGE MANAGEMENT ==========
+
+            loadUsers() {
+                try {
+                    const stored = localStorage.getItem("notes_app_users");
+                    this.users = stored ? JSON.parse(stored) : [];
+                } catch (e) {
+                    console.error("Error loading users:", e);
+                    this.users = [];
+                }
+
+                for (let u of this.users) {
+                    if (!(u[0] in this.receivedNotes)) {
+                        this.receivedNotes[u[0]] = [];
+                    }
+                    if (!(u[0] in this.timestamps)) {
+                        this.timestamps[u[0]] = [];
+                    }
+                }
+            }
+
+            saveUsers() {
+                try {
+                    localStorage.setItem("notes_app_users", JSON.stringify(this.users));
+                } catch (e) {
+                    console.error("Error saving users:", e);
+                    this.showMessage("Error", "Failed to save data 💔");
+                }
+            }
+
+            loadNotes() {
+                try {
+                    const stored = localStorage.getItem("notes_app_notes");
+                    const data = stored ? JSON.parse(stored) : { notes: {}, timestamps: {} };
+                    this.receivedNotes = data.notes || {};
+                    this.timestamps = data.timestamps || {};
+                } catch (e) {
+                    console.error("Error loading notes:", e);
+                    this.receivedNotes = {};
+                    this.timestamps = {};
+                }
+
+                for (let u of this.users) {
+                    if (!(u[0] in this.receivedNotes)) {
+                        this.receivedNotes[u[0]] = [];
+                    }
+                    if (!(u[0] in this.timestamps)) {
+                        this.timestamps[u[0]] = [];
+                    }
+                }
+            }
+
+            saveNotes() {
+                try {
+                    const data = {
+                        notes: this.receivedNotes,
+                        timestamps: this.timestamps
+                    };
+                    localStorage.setItem("notes_app_notes", JSON.stringify(data));
+                } catch (e) {
+                    console.error("Error saving notes:", e);
+                    this.showMessage("Error", "Failed to save notes 💔");
+                }
+            }
+
+            // ========== MODAL MANAGEMENT ==========
+
+            showMessage(title, message) {
+                const modal = document.getElementById("messageModal");
+                const modalTitle = document.getElementById("modalTitle");
+                const modalMessage = document.getElementById("modalMessage");
+
+                if (modalTitle) modalTitle.textContent = title;
+                if (modalMessage) modalMessage.textContent = message;
+                if (modal) {
+                    modal.classList.add("active");
+                    setTimeout(() => {
+                        modal.querySelector("button").focus();
+                    }, 100);
+                }
+            }
+
+            closeModal() {
+                const modal = document.getElementById("messageModal");
+                if (modal) modal.classList.remove("active");
+            }
+
+            // ========== FRAME MANAGEMENT - TOGGLE IN/OUT ==========
+
+            toggleLoginFrame() {
+                const loginFrame = document.getElementById("loginFrame");
+                if (loginFrame) {
+                    loginFrame.classList.toggle("open");
+                    if (loginFrame.classList.contains("open")) {
+                        setTimeout(() => {
+                            const loginUsername = document.getElementById("loginUsername");
+                            if (loginUsername) loginUsername.focus();
+                        }, 100);
+                    } else {
+                        this.clearFrameInputs(["loginUsername", "loginPassword"]);
+                    }
+                }
+            }
+
+            toggleRegisterFrame() {
+                const registerFrame = document.getElementById("registerFrame");
+                if (registerFrame) {
+                    registerFrame.classList.toggle("open");
+                    if (registerFrame.classList.contains("open")) {
+                        setTimeout(() => {
+                            const registerUsername = document.getElementById("registerUsername");
+                            if (registerUsername) registerUsername.focus();
+                        }, 100);
+                    } else {
+                        this.clearFrameInputs(["registerUsername", "registerPassword", "registerPassword2"]);
+                    }
+                }
+            }
+
+            toggleDeleteFrame() {
+                const deleteFrame = document.getElementById("deleteFrame");
+                if (deleteFrame) {
+                    deleteFrame.classList.toggle("open");
+                    if (deleteFrame.classList.contains("open")) {
+                        this.populateDeleteListbox();
+                    } else {
+                        this.clearFrameInputs(["adminPassword"]);
+                        this.selectedDeleteAccounts.clear();
+                    }
+                }
+            }
+
+            clearFrameInputs(inputIds) {
+                for (let inputId of inputIds) {
+                    const input = document.getElementById(inputId);
+                    if (input) input.value = "";
+                }
+            }
+
+            closeAllFrames() {
+                const frames = ["loginFrame", "registerFrame", "deleteFrame"];
+                for (let frameId of frames) {
+                    const frame = document.getElementById(frameId);
+                    if (frame) frame.classList.remove("open");
+                }
+                this.clearFrameInputs([
+                    "loginUsername", "loginPassword",
+                    "registerUsername", "registerPassword", "registerPassword2",
+                    "adminPassword"
+                ]);
+                this.selectedDeleteAccounts.clear();
+            }
+
+            // ========== DASHBOARD SWITCHING ==========
+
+            showGuestDashboard() {
+                this.showDashboard("guestDash");
+                this.refreshUserList();
+            }
+
+            showSendNoteDashboard() {
+                const sendToTitle = document.getElementById("sendToTitle");
+                if (sendToTitle) {
+                    sendToTitle.textContent = `Send to: ${this.selectedRecipient} 💖`;
+                }
+                this.showDashboard("sendNoteDash");
+                const noteText = document.getElementById("noteText");
+                if (noteText) {
+                    noteText.value = "";
+                    noteText.focus();
+                    this.updateCharCount();
+                }
+            }
+
+            showUserDashboard() {
+                const welcomeMsg = document.getElementById("welcomeMsg");
+                if (welcomeMsg) {
+                    welcomeMsg.textContent = `My Love Notes - ${this.currentUser} ❤️`;
+                }
+                this.showDashboard("userDash");
+                this.refreshNotesList();
+                this.updateUserStatus();
+            }
+
+            showViewNoteDashboard(idx) {
+                const note = this.receivedNotes[this.currentUser][idx];
+                const noteContent = document.getElementById("noteContent");
+                if (noteContent && note) {
+                    noteContent.textContent = note.content;
+                }
+                this.currentViewNoteIdx = idx;
+                this.showDashboard("viewNoteDash");
+            }
+
+            showDashboard(dashId) {
+                const dashboards = document.querySelectorAll(".dashboard");
+                dashboards.forEach(d => d.classList.remove("active"));
+                const dash = document.getElementById(dashId);
+                if (dash) dash.classList.add("active");
+            }
+
+            // ========== USER LIST MANAGEMENT ==========
+
+            refreshUserList() {
+                const userList = document.getElementById("userList");
+                if (!userList) return;
+
+                userList.innerHTML = "";
+
+                if (this.users.length === 0) {
+                    userList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <div>No users yet. Register to get started!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const searchInput = document.getElementById("searchInput");
+                const keyword = searchInput ? searchInput.value.toLowerCase() : "";
+
+                let foundCount = 0;
+                const fragment = document.createDocumentFragment();
+
+                for (let u of this.users) {
+                    const username = u[0];
+                    if (keyword === "" || username.toLowerCase().includes(keyword)) {
+                        foundCount++;
+                        const notes = this.receivedNotes[username] || [];
+                        const item = document.createElement("div");
+                        item.className = "user-item";
+                        if (this.selectedRecipient === username) {
+                            item.classList.add("selected");
+                        }
+
+                        item.innerHTML = `
+                            <span class="user-name">${this.escapeHtml(username)}</span>
+                            <span class="msg-count">${notes.length}</span>
+                        `;
+                        item.onclick = () => this.selectUser(username);
+                        item.setAttribute("role", "option");
+                        fragment.appendChild(item);
+                    }
+                }
+
+                if (foundCount === 0) {
+                    userList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <div>No users found matching your search.</div>
+                        </div>
+                    `;
+                } else {
+                    userList.appendChild(fragment);
+                }
+            }
+
+            selectUser(username) {
+                this.selectedRecipient = username;
+                const addNoteBtn = document.getElementById("addNoteBtn");
+                if (addNoteBtn) addNoteBtn.disabled = false;
+                this.refreshUserList();
+            }
+
+            // ========== NOTES LIST MANAGEMENT ==========
+
+            refreshNotesList() {
+                const notesList = document.getElementById("notesList");
+                if (!notesList) return;
+
+                notesList.innerHTML = "";
+                this.selectedNotes.clear();
+
+                const notes = this.receivedNotes[this.currentUser] || [];
+                const timestamps = this.timestamps[this.currentUser] || [];
+
+                if (notes.length === 0) {
+                    notesList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💌</div>
+                            <div>No messages yet. Be patient, love will come! 💖</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+
+                for (let i = 0; i < notes.length; i++) {
+                    const note = notes[i];
+                    const ts = timestamps[i] || "";
+                    const statusIcon = note.status === "UNREAD" ? "💌" : "❤️";
+
+                    const item = document.createElement("div");
+                    item.className = "note-item";
+                    item.setAttribute("role", "option");
+                    item.innerHTML = `
+                        <div style="display: flex; align-items: center; width: 100%;">
+                            <input type="checkbox" data-note-idx="${i}">
+                            <div style="flex: 1; min-width: 0;">
+                                <div>${statusIcon} Anonymous</div>
+                                <div class="note-timestamp">${ts ? ts.substring(0, 16) : "No date"}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    const checkbox = item.querySelector("input[type='checkbox']");
+                    if (checkbox) {
+                        checkbox.onchange = () => {
+                            if (checkbox.checked) {
+                                this.selectedNotes.add(i);
+                            } else {
+                                this.selectedNotes.delete(i);
+                            }
+                        };
+                    }
+
+                    item.ondblclick = () => {
+                        if (note) {
+                            note.status = "READ";
+                            this.saveNotes();
+                            this.showViewNoteDashboard(i);
+                        }
+                    };
+
+                    fragment.appendChild(item);
+                }
+
+                notesList.appendChild(fragment);
+            }
+
+            // ========== NOTE FUNCTIONS ==========
+
+            goToNotes() {
+                if (!this.selectedRecipient) {
+                    this.showMessage("Error", "Select a user first 💔");
+                    return;
+                }
+                this.showSendNoteDashboard();
+            }
+
+            sendNote() {
+                const noteTextEl = document.getElementById("noteText");
+                const content = noteTextEl ? noteTextEl.value.trim() : "";
+
+                if (content.length === 0) {
+                    this.showMessage("Error", "Note cannot be empty 💔");
+                    return;
+                }
+
+                if (content.length > 300) {
+                    this.showMessage("Error", "Note too long! Max 300 characters 💔");
+                    return;
+                }
+
+                if (!this.isContentSafe(content)) {
+                    this.showMessage("Error", "Offensive content detected. Cannot send 💔");
+                    return;
+                }
+
+                const timestamp = new Date().toLocaleString();
+                if (!(this.selectedRecipient in this.receivedNotes)) {
+                    this.receivedNotes[this.selectedRecipient] = [];
+                }
+                if (!(this.selectedRecipient in this.timestamps)) {
+                    this.timestamps[this.selectedRecipient] = [];
+                }
+
+                this.receivedNotes[this.selectedRecipient].push({
+                    content: content,
+                    status: "UNREAD"
+                });
+                this.timestamps[this.selectedRecipient].push(timestamp);
+
+                this.saveNotes();
+                this.showMessage("Success", "Anonymous note sent! 💌");
+                this.selectedRecipient = null;
+                this.backToDashboard();
+            }
+
+            isContentSafe(content) {
+                const badWords = [
+                    "fuck", "shit", "bitch", "asshole", "dumb", "stupid",
+                    "ugly", "idiot", "loser", "retard", "faggot", "cunt",
+                    "youre ugly", "you are ugly", "fuck you", "kill yourself"
+                ];
+
+                const contentClean = content.toLowerCase().replace(/[^\w\s]/g, "");
+                for (let bad of badWords) {
+                    if (contentClean.includes(bad)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            backToDashboard() {
+                if (this.currentUser === "guest") {
+                    this.showGuestDashboard();
+                } else {
+                    this.showUserDashboard();
+                }
+            }
+
+            // ========== AUTHENTICATION ==========
+
+            doLogin() {
+                const usernameEl = document.getElementById("loginUsername");
+                const passwordEl = document.getElementById("loginPassword");
+                const username = usernameEl ? usernameEl.value.trim() : "";
+                const password = passwordEl ? passwordEl.value.trim() : "";
+
+                if (!username || !password) {
+                    this.showMessage("Error", "All fields required 💔");
+                    return;
+                }
+
+                const user = this.users.find(u => u[0] === username && u[1] === password);
+                if (user) {
+                    this.currentUser = username;
+                    this.loadNotes();
+                    this.closeAllFrames();
+                    this.showUserDashboard();
+                    this.showMessage("Success", `Welcome back, ${username}! 💖`);
+                } else {
+                    this.showMessage("Error", "Invalid credentials 💔");
+                }
+            }
+
+            doRegister() {
+                const usernameEl = document.getElementById("registerUsername");
+                const passwordEl = document.getElementById("registerPassword");
+                const password2El = document.getElementById("registerPassword2");
+                const username = usernameEl ? usernameEl.value.trim() : "";
+                const password = passwordEl ? passwordEl.value.trim() : "";
+                const password2 = password2El ? password2El.value.trim() : "";
+
+                if (!username || !password || !password2) {
+                    this.showMessage("Error", "All fields required 💔");
+                    return;
+                }
+
+                if (password !== password2) {
+                    this.showMessage("Error", "Passwords do not match 💔");
+                    return;
+                }
+
+                if (username.length < 3) {
+                    this.showMessage("Error", "Username must be at least 3 characters 💔");
+                    return;
+                }
+
+                if (password.length < 3) {
+                    this.showMessage("Error", "Password must be at least 3 characters 💔");
+                    return;
+                }
+
+                if (this.users.some(u => u[0].toLowerCase() === username.toLowerCase())) {
+                    this.showMessage("Error", "Username already exists 💔");
+                    return;
+                }
+
+                this.users.push([username, password]);
+                this.saveUsers();
+                this.currentUser = username;
+                this.loadNotes();
+                this.closeAllFrames();
+                this.showMessage("Success", `Account ${username} created 💌`);
+                this.showUserDashboard();
+            }
+
+            // ========== ACCOUNT DELETION ==========
+
+            populateDeleteListbox() {
+                const listbox = document.getElementById("deleteListbox");
+                if (!listbox) return;
+
+                listbox.innerHTML = "";
+
+                if (this.users.length === 0) {
+                    listbox.innerHTML = `<div class="empty-state"><div>No accounts to delete</div></div>`;
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+
+                for (let u of this.users) {
+                    const item = document.createElement("div");
+                    item.className = "delete-item";
+                    item.innerHTML = `
+                        <input type="checkbox" data-user="${this.escapeHtml(u[0])}">
+                        <label>${this.escapeHtml(u[0])}</label>
+                    `;
+
+                    const checkbox = item.querySelector("input[type='checkbox']");
+                    if (checkbox) {
+                        checkbox.onchange = () => {
+                            if (checkbox.checked) {
+                                this.selectedDeleteAccounts.add(u[0]);
+                            } else {
+                                this.selectedDeleteAccounts.delete(u[0]);
+                            }
+                        };
+                    }
+
+                    fragment.appendChild(item);
+                }
+
+                listbox.appendChild(fragment);
+            }
+
+            deleteSelectedAccounts() {
+                if (this.selectedDeleteAccounts.size === 0) {
+                    this.showMessage("Error", "Select at least one account 💔");
+                    return;
+                }
+
+                const adminPassEl = document.getElementById("adminPassword");
+                const adminPass = adminPassEl ? adminPassEl.value.trim() : "";
+
+                if (adminPass !== "Peleno123") {
+                    this.showMessage("Error", "Wrong admin password 💔");
+                    return;
+                }
+
+                for (let u of this.selectedDeleteAccounts) {
+                    this.users = this.users.filter(user => user[0] !== u);
+                    delete this.receivedNotes[u];
+                    delete this.timestamps[u];
+                }
+
+                this.saveUsers();
+                this.saveNotes();
+                this.showMessage("Success", `Deleted ${this.selectedDeleteAccounts.size} account(s) 💌`);
+                this.selectedDeleteAccounts.clear();
+                this.toggleDeleteFrame();
+                this.refreshUserList();
+            }
+
+            // ========== NOTE DELETION ==========
+
+            deleteAllNotes() {
+                if (confirm("Delete all notes? This cannot be undone. 💔")) {
+                    this.receivedNotes[this.currentUser] = [];
+                    this.timestamps[this.currentUser] = [];
+                    this.saveNotes();
+                    this.refreshNotesList();
+                    this.showMessage("Deleted", "All notes have been deleted 💌");
+                }
+            }
+
+            deleteSelectedNotes() {
+                if (this.selectedNotes.size === 0) {
+                    this.showMessage("Error", "Select at least one note 💔");
+                    return;
+                }
+
+                const indices = Array.from(this.selectedNotes).sort((a, b) => b - a);
+                for (let i of indices) {
+                    this.receivedNotes[this.currentUser].splice(i, 1);
+                    this.timestamps[this.currentUser].splice(i, 1);
+                }
+
+                this.saveNotes();
+                this.refreshNotesList();
+                this.showMessage("Deleted", `Deleted ${indices.length} note(s) 💌`);
+            }
+
+            // ========== USER STATUS ==========
+
+            updateUserStatus() {
+                const userStatusDiv = document.getElementById("userStatusDiv");
+                const currentUserSpan = document.getElementById("currentUserSpan");
+                const logoutBtn = document.getElementById("logoutBtn");
+
+                if (this.currentUser === "guest") {
+                    if (userStatusDiv) userStatusDiv.style.display = "none";
+                    if (logoutBtn) logoutBtn.style.display = "none";
+                } else {
+                    if (userStatusDiv) userStatusDiv.style.display = "block";
+                    if (logoutBtn) logoutBtn.style.display = "block";
+                    if (currentUserSpan) currentUserSpan.textContent = `✨ ${this.escapeHtml(this.currentUser)}`;
+                }
+            }
+
+            logout() {
+                this.currentUser = "guest";
+                this.selectedRecipient = null;
+                this.selectedNotes.clear();
+                this.updateUserStatus();
+                this.closeAllFrames();
+                this.showGuestDashboard();
+                this.showMessage("Logout", "You have been logged out 👋");
+            }
+
+            // ========== AUTO REFRESH ==========
+
+            startAutoRefresh() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                }
+
+                this.refreshInterval = setInterval(() => {
+                    if (this.currentUser !== "guest") {
+                        this.loadNotes();
+                        this.refreshNotesList();
+                    }
+                }, 5000);
+            }
+
+            stopAutoRefresh() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                    this.refreshInterval = null;
+                }
+            }
+
+            // ========== UTILITY FUNCTIONS ==========
+
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            exitApp() {
+                if (confirm("Exit the application? 👋")) {
+                    this.stopAutoRefresh();
+                    window.close();
+                }
+            }
+        }
+
+        // Initialize app
+        let app;
+        document.addEventListener("DOMContentLoaded", () => {
+            app = new NotesApp();
+        });
+
+        // Cleanup
+        window.addEventListener("beforeunload", () => {
+            if (app) {
+                app.stopAutoRefresh();
+            }
+        });
+    </script>
+</body>
+</html>
